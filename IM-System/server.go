@@ -3,20 +3,30 @@ package main
 import (
 	"fmt"
 	"net"
+	"sync"
 )
 
 //一个服务器需要有IP和端口地址
 type Server struct {
 	Ip   string
 	Port int
+
+	//	在线用户列表
+	OnlineMap map[string]*User
+	//锁
+	mapLock sync.RWMutex
+	//	消息广播的chan管道
+	ServerChan chan string
 }
 
 //创建一个Server接口
 //传入IP和端口,并返回这个Server的实例
 func NewServer(ip string, port int) *Server {
 	server := &Server{
-		Ip:   ip,
-		Port: port,
+		Ip:         ip,
+		Port:       port,
+		OnlineMap:  make(map[string]*User),
+		ServerChan: make(chan string),
 	}
 	return server
 }
@@ -30,6 +40,8 @@ func (this *Server) Start() {
 	if err != nil {
 		fmt.Println("net listen err : ", err)
 	}
+
+	go this.ListenMessage()
 	//最后关闭socket
 	defer listen.Close()
 	for {
@@ -47,4 +59,37 @@ func (this *Server) Start() {
 func (this *Server) Handler(conn net.Conn) {
 	fmt.Println("Client连接成功了")
 
+	//	创建user实例
+	user := NewUser(conn)
+
+	//	当用户连接成功后，将用户添加到在线用户map中
+	this.mapLock.Lock()
+	this.OnlineMap[user.Name] = user
+	this.mapLock.Unlock()
+	//	广播当前用户上线消息
+	this.BoradCasr(user, "login in")
+
+	//阻塞当前连接
+	select {}
+}
+
+//广播信息
+func (this *Server) BoradCasr(user *User, msg string) {
+	//生成一条发送的string数据
+	sendMsg := "[" + user.Addr + "]" + user.Name + ":" + msg
+	this.ServerChan <- sendMsg
+}
+
+//监听广播，一有消息就发送给全部在线用户
+func (this *Server) ListenMessage() {
+
+	for {
+		msg := <-this.ServerChan
+
+		this.mapLock.Lock()
+		for _, cli := range this.OnlineMap {
+			cli.ClientChan <- msg
+		}
+		this.mapLock.Unlock()
+	}
 }
