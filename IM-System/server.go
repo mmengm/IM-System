@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"sync"
 )
@@ -67,14 +68,35 @@ func (this *Server) Handler(conn net.Conn) {
 	this.OnlineMap[user.Name] = user
 	this.mapLock.Unlock()
 	//	广播当前用户上线消息
-	this.BoradCasr(user, "login in")
+	this.BoradCast(user, "login in")
+
+	//用户消息广播  群聊实现
+	go func() {
+		buf := make([]byte, 4096)
+		for {
+			read, err := conn.Read(buf)
+			if read == 0 {
+				this.BoradCast(user, "login out")
+			}
+
+			if err != nil && err != io.EOF {
+				fmt.Println("Conn Read err", err)
+				return
+			}
+			//数据从conn连接中获取
+			msg := string(buf[0 : read-1])
+			this.BoradCast(user, msg)
+
+		}
+
+	}()
 
 	//阻塞当前连接
 	select {}
 }
 
 //广播信息
-func (this *Server) BoradCasr(user *User, msg string) {
+func (this *Server) BoradCast(user *User, msg string) {
 	//生成一条发送的string数据
 	sendMsg := "[" + user.Addr + "]" + user.Name + ":" + msg
 	this.ServerChan <- sendMsg
