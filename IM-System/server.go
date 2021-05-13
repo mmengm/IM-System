@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 //一个服务器需要有IP和端口地址
@@ -70,6 +71,7 @@ func (this *Server) Handler(conn net.Conn) {
 	////	广播当前用户上线消息
 	//this.BoradCast(user, "login in")
 	user.Online()
+	isLive := make(chan bool)
 
 	//用户消息广播  群聊实现
 	go func() {
@@ -89,12 +91,28 @@ func (this *Server) Handler(conn net.Conn) {
 			msg := string(buf[0 : read-1])
 			//this.BoradCast(user, msg)
 			user.DoMessage(msg)
+			//如果每次发送消息，就将当前用户生成活跃
+			isLive <- true
 		}
 
 	}()
 
 	//阻塞当前连接
-	select {}
+	for {
+		select {
+		case <-isLive:
+
+		case <-time.After(time.Second * 10):
+			user.SendMsg("您长时间不活跃，已被强行踢出")
+			//关闭管道
+			close(user.ClientChan)
+			//关闭连接
+			conn.Close()
+			//	推出当前handler
+			return
+		}
+
+	}
 }
 
 //广播信息
