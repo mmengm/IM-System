@@ -61,14 +61,15 @@ func (this *Server) Handler(conn net.Conn) {
 	fmt.Println("Client连接成功了")
 
 	//	创建user实例
-	user := NewUser(conn)
-
-	//	当用户连接成功后，将用户添加到在线用户map中
-	this.mapLock.Lock()
-	this.OnlineMap[user.Name] = user
-	this.mapLock.Unlock()
-	//	广播当前用户上线消息
-	this.BoradCast(user, "login in")
+	user := NewUser(conn, this)
+	//
+	////	当用户连接成功后，将用户添加到在线用户map中
+	//this.mapLock.Lock()
+	//this.OnlineMap[user.Name] = user
+	//this.mapLock.Unlock()
+	////	广播当前用户上线消息
+	//this.BoradCast(user, "login in")
+	user.Online()
 
 	//用户消息广播  群聊实现
 	go func() {
@@ -76,7 +77,8 @@ func (this *Server) Handler(conn net.Conn) {
 		for {
 			read, err := conn.Read(buf)
 			if read == 0 {
-				this.BoradCast(user, "login out")
+				//this.BoradCast(user, "login out")
+				user.Offline()
 			}
 
 			if err != nil && err != io.EOF {
@@ -85,8 +87,8 @@ func (this *Server) Handler(conn net.Conn) {
 			}
 			//数据从conn连接中获取
 			msg := string(buf[0 : read-1])
-			this.BoradCast(user, msg)
-
+			//this.BoradCast(user, msg)
+			user.DoMessage(msg)
 		}
 
 	}()

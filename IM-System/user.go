@@ -8,10 +8,11 @@ type User struct {
 	Addr       string
 	ClientChan chan string
 	conn       net.Conn
+	server     *Server
 }
 
 //创建用户
-func NewUser(conn net.Conn) *User {
+func NewUser(conn net.Conn, server *Server) *User {
 
 	//获取Client的地址
 	userAddr := conn.RemoteAddr().String()
@@ -21,6 +22,7 @@ func NewUser(conn net.Conn) *User {
 		Addr:       userAddr,
 		ClientChan: make(chan string),
 		conn:       conn,
+		server:     server,
 	}
 	//开启一个goroutine，监听用户chan中是否有数据
 	go user.ListenMessage()
@@ -35,4 +37,30 @@ func (this *User) ListenMessage() {
 		this.conn.Write([]byte(msg + "\n"))
 	}
 
+}
+
+//用户上线
+func (this *User) Online() {
+	this.server.mapLock.Lock()
+	this.server.OnlineMap[this.Name] = this
+	this.server.mapLock.Unlock()
+	this.server.BoradCast(this, "login in")
+}
+
+//用户下线
+
+func (this *User) Offline() {
+
+	this.server.mapLock.Lock()
+	delete(this.server.OnlineMap, this.Name)
+	this.server.mapLock.Unlock()
+
+	this.server.BoradCast(this, "login out")
+}
+
+//发送消息
+
+func (this *User) DoMessage(msg string) {
+
+	this.server.BoradCast(this, msg)
 }
