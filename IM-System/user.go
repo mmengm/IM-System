@@ -61,6 +61,24 @@ func (this *User) Offline() {
 //发送消息
 
 func (this *User) DoMessage(msg string) {
+	//如果用户输入 who 就将在线人数的集合发送给他
+	if msg == "who" {
+		this.server.mapLock.Lock()
+		for _, user := range this.server.OnlineMap {
+			OnlineMsg := "[" + user.Addr + "]" + user.Name + ":" + "loginng ing \n "
+			this.SendMsg(OnlineMsg)
 
-	this.server.BoradCast(this, msg)
+		}
+		this.server.mapLock.Unlock()
+	} else {
+
+		this.server.BoradCast(this, msg)
+	}
+
+}
+
+//往当前这个连接中发送数据
+func (this *User) SendMsg(msg string) {
+	this.conn.Write([]byte(msg))
+
 }
