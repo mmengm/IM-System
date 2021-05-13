@@ -58,7 +58,7 @@ func (this *Server) Start() {
 
 }
 func (this *Server) Handler(conn net.Conn) {
-	fmt.Println("Client连接成功了")
+	//fmt.Println("Client连接成功了")
 
 	//	创建user实例
 	user := NewUser(conn, this)

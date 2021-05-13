@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d05803a7-c4ca-4dec-887c-f15cfd57d4e8" name="Default Changelist" comment="即时聊天.v4版本&#10;(修改业务，将用户上线下线发送消息功能,逻辑分离,在用户类当中书写，在server中调用)">
+    <list default="true" id="d05803a7-c4ca-4dec-887c-f15cfd57d4e8" name="Default Changelist" comment="即时聊天.v5版本&#10;(用户输入 who 指令,就可获得在线人数，如果发送其他就发送给server，再由server发送给其他client)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/user.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -82,7 +83,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="即时聊天.v3版本&#10;(实现用户输入,并全局广播给在线用户)" />
     <MESSAGE value="即时聊天.v4版本&#10;(修改业务，将用户上线下线发送消息功能,逻辑分离,在用户类当中书写，在server中调用)" />
-    <option name="LAST_COMMIT_MESSAGE" value="即时聊天.v4版本&#10;(修改业务，将用户上线下线发送消息功能,逻辑分离,在用户类当中书写，在server中调用)" />
+    <MESSAGE value="即时聊天.v5版本&#10;(用户输入 who 指令,就可获得在线人数，如果发送其他就发送给server，再由server发送给其他client)" />
+    <option name="LAST_COMMIT_MESSAGE" value="即时聊天.v5版本&#10;(用户输入 who 指令,就可获得在线人数，如果发送其他就发送给server，再由server发送给其他client)" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
