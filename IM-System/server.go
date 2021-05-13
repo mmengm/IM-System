@@ -102,7 +102,7 @@ func (this *Server) Handler(conn net.Conn) {
 		select {
 		case <-isLive:
 
-		case <-time.After(time.Second * 10):
+		case <-time.After(time.Second * 30):
 			user.SendMsg("您长时间不活跃，已被强行踢出")
 			//关闭管道
 			close(user.ClientChan)
